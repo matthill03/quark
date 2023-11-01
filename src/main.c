@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "include/lexer.h"
+#include "include/parser.h"
 
 int main(int argc, char* argv[])
 {
@@ -8,11 +9,11 @@ int main(int argc, char* argv[])
         "echo(name);\n"
     );
 
-    token_t* token = (void*)0;
+    parser_t* parser = init_parser(lexer);
 
-    while ((token = lexer_get_next_token(lexer)) != (void*)0)
-    {
-        printf("TOKEN(%d, %s)\n", token->type, token->value);
-    }
+    AST_t* root = parser_parse(parser);
+   
+    printf('hgoggoh\n');
+
     return 0;
 }

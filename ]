@@ -1,0 +1,27 @@
+src/main.c|16 col 12 warning| multi-character character constant [-Wmultichar]
+||     printf('hgoggoh\n');
+||            ^
+src/main.c|16 col 12 warning| character constant too long for its type
+src/main.c|16 col 12 warning| incompatible integer to pointer conversion passing 'int' to parameter of type 'const char *' [-Wint-conversion]
+||     printf('hgoggoh\n');
+||            ^~~~~~~~~~~
+/Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk/usr/include/stdio.h|175 col 36 info| passing argument to parameter here
+|| int      printf(const char * __restrict, ...) __printflike(1, 2);
+||                                        ^
+src/main.c|16 col 12 warning| format string is not a string literal (potentially insecure) [-Wformat-security]
+||     printf('hgoggoh\n');
+||            ^~~~~~~~~~~
+src/main.c|16 col 12 info| treat the string as an argument to avoid this
+||     printf('hgoggoh\n');
+||            ^
+||            "%s", 
+src/main.c|14 col 12 warning| unused variable 'root' [-Wunused-variable]
+||     AST_t* root = parser_parse(parser);
+||            ^
+src/main.c|5 col 14 warning| unused parameter 'argc' [-Wunused-parameter]
+|| int main(int argc, char* argv[])
+||              ^
+src/main.c|5 col 26 warning| unused parameter 'argv' [-Wunused-parameter]
+|| int main(int argc, char* argv[])
+||                          ^
+|| 7 warnings generated.
