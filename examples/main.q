@@ -1,8 +1,8 @@
-func [int] main() {
-  set [string] name : "matt";
-  set [int] age : 20;
+func int::main() {
+  set string::name = "matt";
+  set int::age = 20;
 
-  if name = "matt" {
+  if name == "matt" {
     echo(name);
   }
 
