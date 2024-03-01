@@ -1,3 +1,3 @@
 set string::name = "matt";
 
-echo(name)
+echo(name);

@@ -10,6 +10,7 @@
 typedef struct PARSER_STRUCT {
   lexer_T* lexer;
   token_T* current_token;
+  token_T* previous_token;
   
 } parser_T;
 
