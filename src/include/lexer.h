@@ -4,16 +4,20 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "macros.h"
 #include "token.h"
 
 typedef struct LEXER_STRUCT {
   char c;
   unsigned int i;
   char *contents;
+  int contents_size;
 
 } lexer_T;
 
 lexer_T *init_lexer(char *contents);
+
+char lexer_peek(lexer_T* lexer, int offset);
 
 void lexer_advance(lexer_T *lexer);
 

@@ -5,10 +5,15 @@
 lexer_T *init_lexer(char *contents) {
   lexer_T *lexer = calloc(1, sizeof(struct LEXER_STRUCT));
   lexer->contents = contents;
+  lexer->contents_size = strlen(contents);
   lexer->i = 0;
   lexer->c = contents[lexer->i];
 
   return lexer;
+}
+
+char lexer_peek(lexer_T* lexer, int offset) {
+  return lexer->contents[MIN(lexer->i + offset, lexer->contents_size)];
 }
 
 void lexer_advance(lexer_T *lexer) {
