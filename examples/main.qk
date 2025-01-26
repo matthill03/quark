@@ -1,4 +1,4 @@
-func int::main() {
+func main() -> int {
 
     var a: int = 10;
 

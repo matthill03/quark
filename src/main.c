@@ -18,6 +18,8 @@ typedef enum {
     TOK_LBRACE,
     TOK_RBRACE,
     TOK_EQUAL,
+    TOK_DASH,
+    TOK_GT,
 } TokenType;
 
 char* tok_type_as_string(TokenType type) {
@@ -32,6 +34,8 @@ char* tok_type_as_string(TokenType type) {
         case TOK_LBRACE: return "TOK_LBRACE";
         case TOK_RBRACE: return "TOK_RBRACE";
         case TOK_EQUAL: return "TOK_EQUAL";
+        case TOK_DASH: return "TOK_DASH";
+        case TOK_GT: return "TOK_GT";
         default: return "INVALID";
     };
 }
@@ -43,7 +47,7 @@ typedef struct {
 } Token;
 
 bool isdelim(int chr) {
-    return (chr == ':' || chr == '(' || chr == ')' || chr == '{' || chr == '}' || chr == '=' || chr == ';');
+    return (chr == ':' || chr == '(' || chr == ')' || chr == '{' || chr == '}' || chr == '=' || chr == ';' || chr == '-' || chr == '>');
 }
 
 void parse_content(char* file_content) {
