@@ -19,6 +19,7 @@ typedef enum {
     TOK_RBRACE,
     TOK_EQUAL,
     TOK_DASH,
+    TOK_ARROW,
     TOK_GT,
 } TokenType;
 
@@ -36,6 +37,7 @@ char* tok_type_as_string(TokenType type) {
         case TOK_EQUAL: return "TOK_EQUAL";
         case TOK_DASH: return "TOK_DASH";
         case TOK_GT: return "TOK_GT";
+        case TOK_ARROW: return "TOK_ARROW";
         default: return "INVALID";
     };
 }
@@ -50,34 +52,75 @@ bool isdelim(int chr) {
     return (chr == ':' || chr == '(' || chr == ')' || chr == '{' || chr == '}' || chr == '=' || chr == ';' || chr == '-' || chr == '>');
 }
 
-void parse_content(char* file_content) {
-    int start = 0, end = 0, length = 0;
-
+void parse_content(const char* file_content) {
     int i = 0;
     while (file_content[i] != '\0') {
-        if (isalpha(file_content[i])) {
-            start = i;
-            while (!isspace(file_content[i]) && !isdelim(file_content[i])) {
-                end = i;
+        int start = i;
+        int length = 0;
+
+        // Skip any leading whitespace (spaces, newlines, etc.)
+        if (isspace(file_content[i])) {
+            i++;
+            continue;
+        }
+
+        if (isalpha(file_content[i])) {  // Identifiers (and numbers, if necessary)
+            while (isalnum(file_content[i]) || file_content[i] == '_') { // Include underscore for identifiers
                 i++;
             }
-            length = (end - start) + 1;
+            length = i - start;
             printf("ALPHA: Token -> %s, Value -> %.*s, Length -> %d\n", tok_type_as_string(TOK_ID), length, file_content + start, length);
         } else if (isdigit(file_content[i])) {
-            start = i;
-            while (!isspace(file_content[i]) && !isdelim(file_content[i])) {
-                end = i;
+            while (isdigit(file_content[i])) {
                 i++;
             }
-            length = (end - start) + 1;
+            length = i - start;
             printf("DIGIT: Token -> %s, Value -> %.*s, Length -> %d\n", tok_type_as_string(TOK_INT), length, file_content + start, length);
-        } else if (isdelim(file_content[i])) {
+        } else if (isdelim(file_content[i])) {  // Delimiters (like :, (, ), {, }, etc.)
+            switch (file_content[i]) {
+                case '(':
+                    printf("ALPHA: Token -> %s, Value -> (, Length -> 1\n", tok_type_as_string(TOK_LPAREN));
+                    break;
+                case ')':
+                    printf("ALPHA: Token -> %s, Value -> ), Length -> 1\n", tok_type_as_string(TOK_RPAREN));
+                    break;
+                case '-':
+                    if (file_content[i + 1] == '>') {
+                        printf("ALPHA: Token -> %s, Value -> ->, Length -> 2\n", tok_type_as_string(TOK_ARROW));
+                        i++;
+                        break;
+                    }
+
+                    printf("ALPHA: Token -> %s, Value -> -, Length -> 1\n", tok_type_as_string(TOK_DASH));
+                    break;
+                case '>':
+                    printf("ALPHA: Token -> %s, Value -> >, Length -> 1\n", tok_type_as_string(TOK_GT));
+                    break;
+                case '{':
+                    printf("ALPHA: Token -> %s, Value -> {, Length -> 1\n", tok_type_as_string(TOK_LBRACE));
+                    break;
+                case '}':
+                    printf("ALPHA: Token -> %s, Value -> }, Length -> 1\n", tok_type_as_string(TOK_RBRACE));
+                    break;
+                case ':':
+                    printf("ALPHA: Token -> %s, Value -> :, Length -> 1\n", tok_type_as_string(TOK_COLON));
+                    break;
+                case '=':
+                    printf("ALPHA: Token -> %s, Value -> =, Length -> 1\n", tok_type_as_string(TOK_EQUAL));
+                    break;
+                case ';':
+                    printf("ALPHA: Token -> %s, Value -> ;, Length -> 1\n", tok_type_as_string(TOK_SEMI));
+                    break;
+                default:
+                    printf("Invalid delimiter...\n");
+            }
             i++;
-        } else if (isspace(file_content[i])) {
-            i++;
+        } else {
+            i++;  // Skip any non-alphanumeric, non-delim characters
         }
     }
 }
+
 
 int main(int argc, char** argv) {
     if (argc < 2) {
@@ -87,15 +130,13 @@ int main(int argc, char** argv) {
 
     const char* file_path = argv[1];
 
-    long file_size = 0;
-
     FILE* file = fopen(file_path, "r");
     if (file == NULL) {
         printf("ERROR: Could not open file -> %s\n", file_path); 
         exit(EXIT_FAILURE);
     }
     fseek(file, 0, SEEK_END);
-    file_size = ftell(file);
+    const size_t file_size = ftell(file);
 
     fseek(file, 0, SEEK_SET);
     char file_content[file_size + 1];
