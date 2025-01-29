@@ -58,14 +58,13 @@ void parse_content(const char* file_content) {
         int start = i;
         int length = 0;
 
-        // Skip any leading whitespace (spaces, newlines, etc.)
         if (isspace(file_content[i])) {
             i++;
             continue;
         }
 
-        if (isalpha(file_content[i])) {  // Identifiers (and numbers, if necessary)
-            while (isalnum(file_content[i]) || file_content[i] == '_') { // Include underscore for identifiers
+        if (isalpha(file_content[i])) {
+            while (isalnum(file_content[i]) || file_content[i] == '_') {
                 i++;
             }
             length = i - start;
@@ -76,7 +75,7 @@ void parse_content(const char* file_content) {
             }
             length = i - start;
             printf("DIGIT: Token -> %s, Value -> %.*s, Length -> %d\n", tok_type_as_string(TOK_INT), length, file_content + start, length);
-        } else if (isdelim(file_content[i])) {  // Delimiters (like :, (, ), {, }, etc.)
+        } else if (isdelim(file_content[i])) {
             switch (file_content[i]) {
                 case '(':
                     printf("ALPHA: Token -> %s, Value -> (, Length -> 1\n", tok_type_as_string(TOK_LPAREN));
@@ -115,8 +114,6 @@ void parse_content(const char* file_content) {
                     printf("Invalid delimiter...\n");
             }
             i++;
-        } else {
-            i++;  // Skip any non-alphanumeric, non-delim characters
         }
     }
 }
