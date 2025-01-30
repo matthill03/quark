@@ -166,32 +166,113 @@ bool isdelim(int chr) {
     return (chr == ':' || chr == '(' || chr == ')' || chr == '{' || chr == '}' || chr == '=' || chr == ';' || chr == '-' || chr == '>');
 }
 
-void lex_src(Lexer* lexer) {
-    //printf("Lexer src -> %s\n", lexer->src);
+typedef struct TokenListNode {
+    Token* data;
+    struct TokenListNode* next;
+} TokenListNode;
 
-    Token* token;
+typedef struct TokenList {
+    int length;
+    TokenListNode* head;
+} TokenList;
+
+TokenList* token_list_init() {
+    TokenList* token_list = malloc(sizeof(TokenList));
+    if (!token_list) {
+        printf("Failed to allocate memory for token list\n");
+        exit(EXIT_FAILURE);
+    }
+
+    token_list->length = 0;
+    token_list->head = malloc(sizeof(TokenListNode));
+    if (!token_list->head) {
+        printf("Failed to allocate memory for token list head node\n");
+        exit(EXIT_FAILURE);
+    }
+
+    token_list->head->data = NULL;
+    token_list->head->next = NULL;
+
+    return token_list;
+}
+
+void add_token(TokenList* list, Token* token_to_add) {
+    if (token_to_add->type == TOK_NONE) {
+        printf("Token lexing failed somwhere");
+        exit(EXIT_FAILURE);
+    }
+
+    if (!list->head->data) {
+        list->head->data = token_to_add;
+        list->head->next = NULL;
+        list->length++;
+        return;
+    }
+
+    TokenListNode* current_node = list->head;
+    while (current_node->next != NULL) {
+        current_node = current_node->next;
+    }
+
+    current_node->next = malloc(sizeof(TokenListNode));
+    if (!current_node->next) {
+        printf("Failed to allocate memory for next token in list\n");
+        exit(EXIT_FAILURE);
+    }
+
+    current_node->next->data = token_to_add;
+    current_node->next->next = NULL;
+    list->length++;
+}
+
+void free_token_list(TokenList* list) {
+    TokenListNode* current_node = list->head;
+    TokenListNode* previous_node;
+    while (current_node != NULL) {
+        previous_node = current_node;
+        current_node = current_node->next;
+        free(previous_node);
+    }
+
+    free(current_node);
+    free(list);
+}
+
+void print_token_list(TokenList* list) {
+    printf("List Length: %d\n", list->length);
+
+    TokenListNode* current_token = list->head;
+    int i = 1;
+    printf("Token %d -> Type: %d, Value: %s, Length: %d\n", i, current_token->data->type, current_token->data->value, current_token->data->length);
+    while (current_token->next != NULL) {
+        current_token = current_token->next;
+        i++;
+        printf("Token %d -> Type: %d, Value: %s, Length: %d\n", i, current_token->data->type, current_token->data->value, current_token->data->length);
+    }
+}
+
+TokenList* lex_src(Lexer* lexer) {
+    TokenList* tokens = token_list_init();
     while (lexer->current_char != '\0') {
         if (isalpha(lexer->current_char)) {
-            token = lexer_eat_word(lexer);
+            add_token(tokens, lexer_eat_word(lexer));
         } else if (isdigit(lexer->current_char)) {
-            token = lexer_eat_digit(lexer);
+            add_token(tokens, lexer_eat_digit(lexer));
         } else if (isdelim(lexer->current_char)) {
-            token = lexer_eat_delim(lexer);
+            add_token(tokens, lexer_eat_delim(lexer));
         } else {
             lexer_advance(lexer);
             continue;
         }
 
-        if (token->type == TOK_NONE) {
-            printf("Token lexing failed somwhere");
-            exit(EXIT_FAILURE);
-        }
-
-        printf("Value: %s, Length: %d, Type: %d\n", token->value, token->length, token->type);
-        free(token);
     }
+
+    return tokens;
 }
 
+void parse_tokens(TokenList* tokens) {
+    print_token_list(tokens);
+}
 
 int main(int argc, char** argv) {
     if (argc < 2) {
@@ -221,9 +302,10 @@ int main(int argc, char** argv) {
     Lexer lexer;
     lexer_init(&lexer, file_content);
 
-    lex_src(&lexer);
+    TokenList* tokens = lex_src(&lexer);
+    parse_tokens(tokens);
 
-
+    free_token_list(tokens);
 
     return 0;
 }
