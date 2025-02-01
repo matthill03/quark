@@ -1,6 +1,6 @@
-func main() -> int {
+main: fn() -> i32 {
 
-    var a: int = 10;
+    var a: i32 = 10;
 
     return 0;
 }
