@@ -60,6 +60,7 @@ ASTNode* ast_create_literal(const char* type, int value);
 ASTNode* ast_create_return_stmt(ASTNode* value);
 
 void print_ast(ASTNode* root);
+void print_ast_node(ASTNode* node);
 void print_ast_fn_decl(ASTNode* node);
 void print_ast_var_decl(ASTNode* node);
 void print_ast_ret_stmt(ASTNode* node);

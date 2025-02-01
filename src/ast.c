@@ -8,15 +8,19 @@ ASTNode* ast_init() {
     }
 
     new_ast->type = AST_PROGRAM;
-    new_ast->value.program.functions = NULL;
+    new_ast->value.program.functions = ast_create_empty();
     new_ast->next = NULL;
 
     return new_ast;
 }
 
 void ast_append_node(ASTNode** branch_root, ASTNode* node_to_append) {
+    if (!branch_root || !node_to_append) { return; }
+
     if ((*branch_root)->type == AST_NONE) {
-        *branch_root = node_to_append;
+        (*branch_root)->type = node_to_append->type;
+        (*branch_root)->next = node_to_append->next;
+        (*branch_root)->value = node_to_append->value;
         return;
     }
 
@@ -24,16 +28,13 @@ void ast_append_node(ASTNode** branch_root, ASTNode* node_to_append) {
     while (last_node->next != NULL) {
         last_node = last_node->next;
     }
-
     last_node->next = node_to_append;
-    printf("%p\n", branch_root);
-    printf("%p\n", node_to_append);
 }
 
 ASTNode* ast_create_empty() {
     ASTNode* new_ast = calloc(1, sizeof(ASTNode));
     if (!new_ast) {
-        printf("Failed to allocate memory for new ast root\n");
+        printf("Failed to allocate memory for new ast empty node\n");
         exit(EXIT_FAILURE);
     }
 
@@ -117,24 +118,32 @@ ASTNode* ast_create_return_stmt(ASTNode* value) {
 
 void print_ast(ASTNode* root) {
     if (root->type != AST_PROGRAM) {
-        printf("To print the ast, you must pass in the prog root\n");
-        return;
+        printf("Top level root must be of type AST_PROGRAM\n");
+        exit(EXIT_FAILURE);
     }
 
-    printf("Prog: %p, Type: %d\n", root->value.program.functions, root->type);
-    ASTNode* current_node = root->value.program.functions->next;
-    if (current_node->type == AST_FUNCTION_DECL) {
-        ASTNode* body = current_node->value.function_decl.body;
-        switch (current_node->type) {
-            case AST_FUNCTION_DECL:
-                printf("Func Decl -> Name: %s, Type: %d\n", current_node->value.function_decl.name, current_node->type);
-            case AST_VARIABLE_DECL: 
-                printf("Var Decl -> Name: %s, Type: %d, Value: %d\n", current_node->value.variable_decl.name, current_node->type, current_node->value.variable_decl.value->value.literal.int_value);
-            case AST_RETURN_STMT:
-                printf("Ret Stmt -> Value: %d\n", current_node->value.return_stmt.value->value.literal.int_value);
-            default:
-                printf("%p, %d\n", current_node, current_node->type);
-        }
+    printf("Program -> %p\n", root);
+    ASTNode* current_node = root->value.program.functions;
+    print_ast_node(current_node);
+    while (current_node->next) {
+        current_node = current_node->next;
+        print_ast_node(current_node);
+    }
+}
+
+void print_ast_node(ASTNode* node) {
+    switch(node->type) {
+        case AST_FUNCTION_DECL:
+            print_ast_fn_decl(node);
+            break;
+        case AST_VARIABLE_DECL:
+            print_ast_var_decl(node);
+            break;
+        case AST_RETURN_STMT:
+            print_ast_ret_stmt(node);
+            break;
+        default:
+            printf("Type (%d) not supported in a body\n", node->type);
     }
 }
 
@@ -144,20 +153,15 @@ void print_ast_fn_decl(ASTNode* node) {
         exit(EXIT_FAILURE);
     }
 
-    printf("Function def: Name -> %s, Return -> %s, Body -> %p\n", node->value.function_decl.name, node->value.function_decl.return_type, node->value.function_decl.body);
+    printf("|-- Function def: Name -> %s, Return -> %s, Body -> %p\n", node->value.function_decl.name, node->value.function_decl.return_type, node->value.function_decl.body);
     ASTNode* current_body_node = node->value.function_decl.body;
+    printf("    |-- ");
+    print_ast_node(current_body_node);
+
     while (current_body_node->next) {
-        switch(current_body_node->type) {
-            case AST_VARIABLE_DECL:
-                print_ast_var_decl(current_body_node);
-                break;
-            case AST_RETURN_STMT:
-                print_ast_ret_stmt(current_body_node);
-                break;
-            default:
-                printf("Type (%d) not supported in a body\n", current_body_node->type);
-        }
         current_body_node = current_body_node->next;
+        printf("    |-- ");
+        print_ast_node(current_body_node);
     }
 }
 

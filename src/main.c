@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 
     Parser* parser = parser_init(tokens);
     ASTNode* ast = parse_token_array(parser);
-    //print_ast(ast);
+    print_ast(ast);
 
     free_token_array(tokens);
     free(ast);

@@ -92,8 +92,6 @@ ASTNode* parse_decl(Parser* parser) {
         parse_scope(parser, body);
 
         ASTNode* ast_func_node = ast_create_fn_decl(func_name, return_type, body);
-        print_ast_fn_decl(ast_func_node);
-
         return ast_func_node;
     }
 
@@ -111,13 +109,10 @@ ASTNode* parse_decl(Parser* parser) {
     parser_advance(parser, TOK_SEMI);
 
     ASTNode* ast_var_node = ast_create_var_decl(name, type, ast_create_literal(type, atoi(value)));
-
     return ast_var_node;
 }
 
 void parse_scope(Parser* parser, ASTNode* body) {
-    printf("%d\n", body->type);
-
     if (parser->current_token->type != TOK_LBRACE) {
         printf("Invalid token found at the start of scope -> %s\n", parser->current_token->value);
         exit(EXIT_FAILURE);
@@ -129,6 +124,10 @@ void parse_scope(Parser* parser, ASTNode* body) {
 }
 
 void parse_tokens(Parser* parser, ASTNode* root) {
+    if (!root) {
+        printf("Current token -> %s\n", parser->current_token->value);
+    }
+
     switch (parser->current_token->type) {
         case TOK_ID: {
             ASTNode* new_node = parse_id(parser);
