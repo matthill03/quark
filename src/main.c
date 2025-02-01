@@ -379,6 +379,9 @@ void ast_append_node(ASTNode* branch_root, ASTNode* node_to_append) {
     }
 
     last_node->next = node_to_append;
+
+    printf("%p\n", branch_root);
+    printf("%p\n", node_to_append);
 }
 
 ASTNode* ast_create_fn_decl(const char* name, const char* return_type, ASTNode* body) {
@@ -536,7 +539,10 @@ ASTNode* parse_scope(Parser* parser) {
 void parse_tokens(Parser* parser, ASTNode* root) {
     switch (parser->current_token->type) {
         case TOK_ID: {
-            ast_append_node(root, parse_id(parser));
+            ASTNode* new_node = parse_id(parser);
+            if (!new_node) break;
+
+            ast_append_node(root, new_node);
             break;
         }
         case TOK_COLON: {
@@ -567,27 +573,19 @@ void print_ast(ASTNode* root) {
     }
 
     printf("Prog: %p, Type: %d\n", root->value.program.functions, root->type);
-    ASTNode* current_node = root->value.program.functions;
-    while (current_node->next != NULL) {
-        printf("%p, %d", current_node, current_node->type);
-        if (current_node->type == AST_FUNCTION_DECL) {
-            ASTNode* body = current_node->value.function_decl.body;
-            ASTNode* current_body = body;
-            while (current_body->next != NULL) {
-                switch (current_node->type) {
-                    case AST_FUNCTION_DECL:
-                        printf("Func Decl -> Name: %s\n", current_node->value.function_decl.name);
-                    case AST_VARIABLE_DECL: 
-                        printf("Var Decl -> Name: %s\n", current_node->value.variable_decl.name);
-                    case AST_RETURN_STMT:
-                        printf("Ret Stmt -> Value: %d\n", current_node->value.return_stmt.value->value.literal.int_value);
-                    default:
-                        printf("%p, %d\n", current_node, current_node->type);
-                }
-                current_body = current_body->next;
-            }
+    ASTNode* current_node = root->value.program.functions->next;
+    if (current_node->type == AST_FUNCTION_DECL) {
+        ASTNode* body = current_node->value.function_decl.body;
+        switch (current_node->type) {
+            case AST_FUNCTION_DECL:
+                printf("Func Decl -> Name: %s\n", current_node->value.function_decl.name);
+            case AST_VARIABLE_DECL: 
+                printf("Var Decl -> Name: %s\n", current_node->value.variable_decl.name);
+            case AST_RETURN_STMT:
+                printf("Ret Stmt -> Value: %d\n", current_node->value.return_stmt.value->value.literal.int_value);
+            default:
+                printf("%p, %d\n", current_node, current_node->type);
         }
-        current_node = current_node->next;
     }
 }
 
